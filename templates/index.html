@@ -1,0 +1,1196 @@
+﻿# Flight Operations Center — index.html
+
+```html
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Flight Operations Center</title>
+
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- SIDEBAR -->
+
+<aside class="sidebar">
+
+    <div class="logo">
+
+        <div class="logo-mark">
+            ✈
+        </div>
+
+        <div>
+            <strong>FLIGHT OPS</strong>
+            <small>OPERATIONS CENTER</small>
+        </div>
+
+    </div>
+
+
+    <div class="nav-title">
+        CONTROL CENTER
+    </div>
+
+
+    <button class="nav active">
+        <span>▦</span>
+        Operations
+    </button>
+
+    <button class="nav"
+            onclick="openFlightModal()">
+        <span>✈</span>
+        New Flight
+    </button>
+
+    <button class="nav"
+            onclick="scrollToElement('weather')">
+        <span>☁</span>
+        Weather
+    </button>
+
+    <button class="nav"
+            onclick="scrollToElement('notam')">
+        <span>⚠</span>
+        NOTAM
+    </button>
+
+    <button class="nav"
+            onclick="scrollToElement('aircraft')">
+        <span>◉</span>
+        Aircraft
+    </button>
+
+
+    <div class="nav-title">
+        REPORTING
+    </div>
+
+    <button class="nav"
+            onclick="scrollToElement('dispatch')">
+        <span>▤</span>
+        Dispatch
+    </button>
+
+    <button class="nav">
+        <span>▥</span>
+        Flight Log
+    </button>
+
+
+    <div class="sidebar-status">
+
+        <div class="online">
+            <span></span>
+            SYSTEM ONLINE
+        </div>
+
+        <small>
+            Simulation Engine v2.4
+        </small>
+
+    </div>
+
+</aside>
+
+
+<!-- MAIN -->
+
+<main>
+
+<header class="topbar">
+
+    <div>
+
+        <div class="eyebrow">
+            OPERATIONS CONTROL CENTER
+        </div>
+
+        <h1>
+            Flight Operations
+        </h1>
+
+    </div>
+
+
+    <div class="top-right">
+
+        <div class="utc">
+            <span>LOCAL TIME</span>
+            <strong id="clock">
+                --:--:--
+            </strong>
+        </div>
+
+        <div class="user">
+            KO
+        </div>
+
+    </div>
+
+</header>
+
+
+<!-- FLIGHT HEADER -->
+
+<section class="flight-header">
+
+    <div class="flight-id">
+
+        <div class="status-dot"></div>
+
+        <div>
+
+            <span>ACTIVE FLIGHT</span>
+
+            <h2>
+                {{ data.callsign }}
+            </h2>
+
+        </div>
+
+    </div>
+
+
+    <div class="route-header">
+
+        <div>
+            <strong>{{ data.departure }}</strong>
+            <small>{{ data.departure_name }}</small>
+        </div>
+
+        <div class="route-arrow">
+            ━━━ ✈ ━━━
+        </div>
+
+        <div>
+            <strong>{{ data.destination }}</strong>
+            <small>{{ data.destination_name }}</small>
+        </div>
+
+    </div>
+
+
+    <div class="dispatch-status">
+
+        <span>DISPATCH</span>
+
+        <strong class="{{ data.decision|lower }}">
+            {{ data.decision }}
+        </strong>
+
+    </div>
+
+</section>
+
+
+<!-- KPI -->
+
+<section class="kpis">
+
+    <div class="kpi">
+
+        <span>FLIGHT PHASE</span>
+
+        <strong id="phase">
+            PREFLIGHT
+        </strong>
+
+        <small>
+            Current operation
+        </small>
+
+    </div>
+
+
+    <div class="kpi">
+
+        <span>ALTITUDE</span>
+
+        <strong id="altitude">
+            0
+        </strong>
+
+        <small>FT</small>
+
+    </div>
+
+
+    <div class="kpi">
+
+        <span>GROUND SPEED</span>
+
+        <strong id="speed">
+            0
+        </strong>
+
+        <small>KM/H</small>
+
+    </div>
+
+
+    <div class="kpi">
+
+        <span>FUEL REMAINING</span>
+
+        <strong id="fuel">
+            {{ "{:,}".format(data.fuel) }}
+        </strong>
+
+        <small>KG</small>
+
+    </div>
+
+
+    <div class="kpi progress-kpi">
+
+        <span>FLIGHT PROGRESS</span>
+
+        <strong id="progress">
+            0%
+        </strong>
+
+        <div class="progress-track">
+            <i id="progressBar"></i>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- MAIN GRID -->
+
+<section class="dashboard-grid">
+
+
+<!-- MAP -->
+
+<div class="panel map-panel">
+
+    <div class="panel-head">
+
+        <div>
+
+            <span>LIVE TRACKING</span>
+
+            <h3>
+                Flight Route
+            </h3>
+
+        </div>
+
+        <div class="live">
+            <i></i>
+            LIVE
+        </div>
+
+    </div>
+
+
+    <div class="map">
+
+        <div class="map-lines"></div>
+
+        <div class="map-route">
+
+            <div class="airport airport-left">
+
+                <strong>
+                    {{ data.departure }}
+                </strong>
+
+                <small>
+                    {{ data.departure_name }}
+                </small>
+
+            </div>
+
+
+            <div class="flight-line">
+
+                <div
+                class="moving-plane"
+                id="movingPlane">
+
+                    ✈
+
+                </div>
+
+            </div>
+
+
+            <div class="airport airport-right">
+
+                <strong>
+                    {{ data.destination }}
+                </strong>
+
+                <small>
+                    {{ data.destination_name }}
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="map-info">
+
+            <div>
+                <span>DISTANCE</span>
+                <strong>
+                    {{ data.distance }} KM
+                </strong>
+            </div>
+
+            <div>
+                <span>CRUISE</span>
+                <strong>
+                    {{ data.cruise_speed }} KM/H
+                </strong>
+            </div>
+
+            <div>
+                <span>EST. FLIGHT</span>
+                <strong>
+                    {{ "%.1f"|format(
+                        data.distance /
+                        data.cruise_speed
+                    ) }} H
+                </strong>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- STATUS -->
+
+<div class="panel">
+
+    <div class="panel-head">
+
+        <div>
+
+            <span>REAL-TIME</span>
+
+            <h3>
+                Flight Status
+            </h3>
+
+        </div>
+
+    </div>
+
+
+    <div class="status-list">
+
+        <div>
+            <span>ALTITUDE</span>
+            <strong id="altitude2">
+                0 FT
+            </strong>
+        </div>
+
+        <div>
+            <span>SPEED</span>
+            <strong id="speed2">
+                0 KM/H
+            </strong>
+        </div>
+
+        <div>
+            <span>PHASE</span>
+            <strong id="phase2">
+                PREFLIGHT
+            </strong>
+        </div>
+
+        <div>
+            <span>FUEL</span>
+            <strong id="fuel2">
+                {{ data.fuel }} KG
+            </strong>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- WEATHER -->
+
+<div class="panel"
+     id="weather">
+
+    <div class="panel-head">
+
+        <div>
+
+            <span>METEOROLOGY</span>
+
+            <h3>
+                Weather Assessment
+            </h3>
+
+        </div>
+
+        <span class="weather-icon">
+            ☁
+        </span>
+
+    </div>
+
+
+    <div class="weather-main">
+
+        <strong>
+            {{ data.weather_risk }}
+        </strong>
+
+        <span>
+            Operational Risk
+        </span>
+
+    </div>
+
+
+    <div class="weather-details">
+
+        <div>
+            <span>WIND</span>
+            <strong>240° / 12 KT</strong>
+        </div>
+
+        <div>
+            <span>VISIBILITY</span>
+            <strong>10+ KM</strong>
+        </div>
+
+        <div>
+            <span>CEILING</span>
+            <strong>UNLIMITED</strong>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- RISK -->
+
+<div class="panel">
+
+    <div class="panel-head">
+
+        <div>
+
+            <span>OPERATIONAL</span>
+
+            <h3>
+                Risk Matrix
+            </h3>
+
+        </div>
+
+    </div>
+
+
+    <div class="risk-list">
+
+        <div>
+            <span>WEATHER</span>
+            <b class="yellow">
+                {{ data.weather_risk }}
+            </b>
+        </div>
+
+        <div>
+            <span>CROSSWIND</span>
+            <b class="green">
+                {{ data.crosswind_risk }}
+            </b>
+        </div>
+
+        <div>
+            <span>NOTAM</span>
+            <b class="green">
+                {{ data.notam_risk }}
+            </b>
+        </div>
+
+        <div>
+            <span>ALTERNATE</span>
+            <b class="cyan">
+                {{ data.alternate }}
+            </b>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- FUEL -->
+
+<div class="panel">
+
+    <div class="panel-head">
+
+        <div>
+
+            <span>FUEL MANAGEMENT</span>
+
+            <h3>
+                Fuel Monitoring
+            </h3>
+
+        </div>
+
+    </div>
+
+
+    <div class="fuel-number">
+
+        <strong id="fuelBig">
+            {{ "{:,}".format(data.fuel) }}
+        </strong>
+
+        <span>KG</span>
+
+    </div>
+
+
+    <div class="fuel-track">
+
+        <i
+        style="
+        width:
+        {{ [100,
+        data.fuel / 24210 * 100]|min }}%;
+        ">
+        </i>
+
+    </div>
+
+
+    <div class="fuel-bottom">
+
+        <div>
+
+            <span>REQUIRED</span>
+
+            <strong>
+                {{ "{:,}".format(
+                    data.fuel_required
+                ) }}
+                KG
+            </strong>
+
+        </div>
+
+        <div>
+
+            <span>MARGIN</span>
+
+            <strong>
+                {{ "{:,}".format(
+                    data.fuel_margin
+                ) }}
+                KG
+            </strong>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- AIRCRAFT -->
+
+<div class="panel"
+     id="aircraft">
+
+    <div class="panel-head">
+
+        <div>
+
+            <span>AIRCRAFT</span>
+
+            <h3>
+                Performance
+            </h3>
+
+        </div>
+
+    </div>
+
+
+    <div class="aircraft-name">
+        {{ data.aircraft }}
+    </div>
+
+
+    <div class="performance">
+
+        <div>
+            <span>TAKEOFF</span>
+            <b>{{ data.takeoff }}</b>
+        </div>
+
+        <div>
+            <span>LANDING</span>
+            <b>{{ data.landing }}</b>
+        </div>
+
+        <div>
+            <span>PASSENGERS</span>
+            <b>{{ data.passengers }}</b>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- NOTAM -->
+
+<div class="panel"
+     id="notam">
+
+    <div class="panel-head">
+
+        <div>
+
+            <span>NOTAM</span>
+
+            <h3>
+                Operational Notices
+            </h3>
+
+        </div>
+
+        <b class="notam-count">
+            03
+        </b>
+
+    </div>
+
+
+    <div class="notam-item">
+        <b>RWY 18/36</b>
+        <span>Available for operation</span>
+    </div>
+
+    <div class="notam-item">
+        <b>ILS</b>
+        <span>System operational</span>
+    </div>
+
+    <div class="notam-item">
+        <b>APRON</b>
+        <span>No restrictions reported</span>
+    </div>
+
+</div>
+
+
+<!-- DISPATCH -->
+
+<div class="panel dispatch-panel"
+     id="dispatch">
+
+    <div class="decision-icon">
+        !
+    </div>
+
+
+    <div class="decision-content">
+
+        <span>
+            FINAL DISPATCH DECISION
+        </span>
+
+        <strong
+        class="{{ data.decision|lower }}">
+
+            {{ data.decision }}
+
+        </strong>
+
+        <p>
+            {{ data.recommendation }}
+        </p>
+
+    </div>
+
+
+    <button onclick="openFlightModal()">
+        + NEW FLIGHT
+    </button>
+
+</div>
+
+
+</section>
+
+</main>
+
+</div>
+
+
+<!-- MODAL -->
+
+<div class="modal"
+     id="flightModal">
+
+    <form
+    class="flight-form"
+    method="POST"
+    action="/simulate">
+
+
+        <div class="form-header">
+
+            <div>
+
+                <span>
+                    FLIGHT OPERATIONS
+                </span>
+
+                <h2>
+                    Create New Flight
+                </h2>
+
+            </div>
+
+            <button
+            type="button"
+            onclick="closeFlightModal()">
+
+                ×
+
+            </button>
+
+        </div>
+
+
+        <div class="form-grid">
+
+
+            <label>
+
+                AIRCRAFT
+
+                <select name="aircraft">
+
+                    {% for name in aircraft %}
+
+                    <option>
+                        {{ name }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </label>
+
+
+            <label>
+
+                DEPARTURE
+
+                <select name="departure">
+
+                    {% for code, airport in airports.items() %}
+
+                    <option value="{{ code }}">
+
+                        {{ code }}
+                        —
+                        {{ airport.name }}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </label>
+
+
+            <label>
+
+                DESTINATION
+
+                <select name="destination">
+
+                    {% for code, airport in airports.items() %}
+
+                    <option value="{{ code }}">
+
+                        {{ code }}
+                        —
+                        {{ airport.name }}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </label>
+
+
+            <label>
+
+                PASSENGERS
+
+                <input
+                type="number"
+                name="passengers"
+                value="165"
+                min="1">
+
+            </label>
+
+
+            <label>
+
+                FUEL KG
+
+                <input
+                type="number"
+                name="fuel"
+                value="18000"
+                min="500">
+
+            </label>
+
+
+            <label>
+
+                WEATHER
+
+                <select name="weather">
+
+                    <option value="normal">
+                        Normal
+                    </option>
+
+                    <option
+                    value="moderate"
+                    selected>
+                        Moderate
+                    </option>
+
+                    <option value="poor">
+                        Poor
+                    </option>
+
+                    <option value="severe">
+                        Severe
+                    </option>
+
+                </select>
+
+            </label>
+
+        </div>
+
+
+        <button
+        class="launch"
+        type="submit">
+
+            ▶ START FLIGHT SIMULATION
+
+        </button>
+
+
+    </form>
+
+</div>
+
+
+<script>
+
+function openFlightModal() {
+
+    document
+        .getElementById("flightModal")
+        .classList.add("show");
+
+}
+
+
+function closeFlightModal() {
+
+    document
+        .getElementById("flightModal")
+        .classList.remove("show");
+
+}
+
+
+function scrollToElement(id) {
+
+    document
+        .getElementById(id)
+        .scrollIntoView({
+            behavior: "smooth"
+        });
+
+}
+
+
+function updateClock() {
+
+    const now = new Date();
+
+    document
+        .getElementById("clock")
+        .innerText =
+        now.toLocaleTimeString(
+            "tr-TR"
+        );
+
+}
+
+
+setInterval(updateClock, 1000);
+
+updateClock();
+
+
+let progress = 0;
+
+const startingFuel =
+    {{ data.fuel }};
+
+const distance =
+    {{ data.distance }};
+
+const cruise =
+    {{ data.cruise_speed }};
+
+
+function runSimulation() {
+
+    const timer =
+        setInterval(() => {
+
+            progress += 2;
+
+            if (progress > 100) {
+                progress = 100;
+            }
+
+
+            let altitude = 0;
+            let speed = 0;
+            let phase = "PREFLIGHT";
+
+
+            if (progress < 10) {
+
+                phase = "TAKEOFF";
+
+                altitude =
+                    progress * 900;
+
+                speed =
+                    progress * 40;
+
+            }
+
+            else if (progress < 25) {
+
+                phase = "CLIMB";
+
+                altitude =
+                    9000 +
+                    progress * 900;
+
+                speed =
+                    400 +
+                    progress * 12;
+
+            }
+
+            else if (progress < 82) {
+
+                phase = "CRUISE";
+
+                altitude = 35000;
+
+                speed = cruise;
+
+            }
+
+            else if (progress < 95) {
+
+                phase = "DESCENT";
+
+                altitude =
+                    35000 -
+                    (progress - 82) * 1700;
+
+                speed =
+                    cruise -
+                    (progress - 82) * 22;
+
+            }
+
+            else {
+
+                phase = "LANDING";
+
+                altitude =
+                    Math.max(
+                        0,
+                        13000 -
+                        (progress - 95) * 2600
+                    );
+
+                speed =
+                    Math.max(
+                        0,
+                        220 -
+                        (progress - 95) * 40
+                    );
+
+            }
+
+
+            const fuel =
+                Math.max(
+                    0,
+                    startingFuel -
+                    Math.round(
+                        progress *
+                        distance *
+                        0.0265
+                    )
+                );
+
+
+            document
+                .getElementById("progress")
+                .innerText =
+                progress + "%";
+
+
+            document
+                .getElementById("progressBar")
+                .style.width =
+                progress + "%";
+
+
+            document
+                .getElementById("phase")
+                .innerText =
+                phase;
+
+
+            document
+                .getElementById("phase2")
+                .innerText =
+                phase;
+
+
+            document
+                .getElementById("altitude")
+                .innerText =
+                Math.round(
+                    altitude
+                ).toLocaleString();
+
+
+            document
+                .getElementById("altitude2")
+                .innerText =
+                Math.round(
+                    altitude
+                ).toLocaleString()
+                + " FT";
+
+
+            document
+                .getElementById("speed")
+                .innerText =
+                Math.round(speed);
+
+
+            document
+                .getElementById("speed2")
+                .innerText =
+                Math.round(speed)
+                + " KM/H";
+
+
+            document
+                .getElementById("fuel")
+                .innerText =
+                fuel.toLocaleString();
+
+
+            document
+                .getElementById("fuel2")
+                .innerText =
+                fuel.toLocaleString()
+                + " KG";
+
+
+            document
+                .getElementById("fuelBig")
+                .innerText =
+                fuel.toLocaleString();
+
+
+            document
+                .getElementById("movingPlane")
+                .style.left =
+                progress + "%";
+
+
+            if (progress >= 100) {
+
+                clearInterval(timer);
+
+            }
+
+        }, 350);
+
+}
+
+
+setTimeout(
+    runSimulation,
+    800
+);
+
+</script>
+
+</body>
+</html>
+```

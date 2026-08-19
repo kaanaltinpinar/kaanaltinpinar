@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Altınpınar Simulation</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    min-height: 100vh;
+    overflow: hidden;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-family: Arial, sans-serif;
+
+    background:
+        radial-gradient(
+            circle at 50% 20%,
+            #12303d 0%,
+            #071119 45%,
+            #03070b 100%
+        );
+
+    color: white;
+}
+
+
+/* =========================
+   KIRMIZI UÇUŞ IŞIKLARI
+========================= */
+
+.flight-lights {
+    position: fixed;
+    inset: 0;
+
+    z-index: 1;
+
+    pointer-events: none;
+}
+
+.flight-light {
+    position: absolute;
+
+    width: 9px;
+    height: 9px;
+
+    border-radius: 50%;
+
+    background: #ff1010;
+
+    box-shadow:
+        0 0 6px #ff0000,
+        0 0 15px #ff0000,
+        0 0 30px rgba(255, 0, 0, .8);
+
+    animation: blink 1.2s infinite;
+}
+
+@keyframes blink {
+
+    0%, 100% {
+        opacity: .25;
+
+        box-shadow:
+            0 0 4px #ff0000;
+    }
+
+    50% {
+        opacity: 1;
+
+        box-shadow:
+            0 0 8px #ff0000,
+            0 0 18px #ff0000,
+            0 0 35px rgba(255, 0, 0, .9);
+    }
+}
+
+.light-1 {
+    left: 12%;
+    top: 25%;
+}
+
+.light-2 {
+    left: 28%;
+    top: 42%;
+    animation-delay: .3s;
+}
+
+.light-3 {
+    left: 44%;
+    top: 20%;
+    animation-delay: .6s;
+}
+
+.light-4 {
+    right: 34%;
+    top: 35%;
+    animation-delay: .9s;
+}
+
+.light-5 {
+    right: 20%;
+    top: 23%;
+    animation-delay: .2s;
+}
+
+.light-6 {
+    right: 12%;
+    top: 55%;
+    animation-delay: .7s;
+}
+
+.light-7 {
+    left: 22%;
+    bottom: 18%;
+    animation-delay: 1s;
+}
+
+
+/* =========================
+   UÇUŞ ROTALARI
+========================= */
+
+.route {
+    position: absolute;
+
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(66, 214, 207, .35),
+            transparent
+        );
+
+    transform-origin: left center;
+
+    opacity: .45;
+}
+
+.route-1 {
+    width: 360px;
+    left: 12%;
+    top: 25%;
+    transform: rotate(18deg);
+}
+
+.route-2 {
+    width: 420px;
+    left: 28%;
+    top: 42%;
+    transform: rotate(-12deg);
+}
+
+.route-3 {
+    width: 300px;
+    right: 18%;
+    top: 35%;
+    transform: rotate(20deg);
+}
+
+
+/* =========================
+   MOUSE TAKİP EDEN UÇAK
+========================= */
+
+#plane {
+    position: fixed;
+
+    left: 50%;
+    top: 18%;
+
+    width: 42px;
+    height: 42px;
+
+    z-index: 9999;
+
+    pointer-events: none;
+
+    transform:
+        translate(-50%, -50%);
+}
+
+
+/* Uçak gövdesi */
+
+.plane-body {
+    position: absolute;
+
+    left: 14px;
+    top: 4px;
+
+    width: 12px;
+    height: 34px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #b9ffff,
+            #42d6cf,
+            #8afff9
+        );
+
+    border-radius:
+        50% 50% 45% 45%;
+
+    box-shadow:
+        0 0 12px #42d6cf;
+}
+
+
+/* Kanatlar */
+
+.plane-wing-left,
+.plane-wing-right {
+
+    position: absolute;
+
+    top: 16px;
+
+    width: 20px;
+    height: 7px;
+
+    background: #42d6cf;
+
+    border-radius: 8px;
+
+    box-shadow:
+        0 0 7px #42d6cf;
+}
+
+.plane-wing-left {
+    left: 0;
+
+    transform:
+        rotate(-18deg);
+}
+
+.plane-wing-right {
+    right: 0;
+
+    transform:
+        rotate(18deg);
+}
+
+
+/* Kuyruk */
+
+.plane-tail {
+
+    position: absolute;
+
+    left: 15px;
+    top: 1px;
+
+    width: 10px;
+    height: 10px;
+
+    background: #42d6cf;
+
+    clip-path:
+        polygon(
+            50% 0,
+            100% 100%,
+            0 100%
+        );
+}
+
+
+/* Motor izi */
+
+.plane-trail {
+
+    position: absolute;
+
+    left: 19px;
+    top: 36px;
+
+    width: 4px;
+    height: 45px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            rgba(66, 214, 207, .8),
+            rgba(66, 214, 207, 0)
+        );
+
+    filter: blur(2px);
+
+    animation:
+        trailMove .35s infinite;
+}
+
+@keyframes trailMove {
+
+    0% {
+        height: 25px;
+        opacity: .9;
+    }
+
+    100% {
+        height: 55px;
+        opacity: 0;
+    }
+}
+
+
+/* =========================
+   LOGIN PANEL
+========================= */
+
+.login-box {
+
+    position: relative;
+
+    z-index: 10;
+
+    width: 390px;
+
+    padding: 40px;
+
+    background:
+        rgba(5, 15, 22, .96);
+
+    border:
+        1px solid
+        rgba(66, 214, 207, .3);
+
+    border-radius: 15px;
+
+    box-shadow:
+        0 30px 100px
+        rgba(0, 0, 0, .7);
+}
+
+.logo {
+
+    width: 58px;
+    height: 58px;
+
+    margin:
+        0 auto 20px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 14px;
+
+    background: #10373d;
+
+    color: #42d6cf;
+
+    font-size: 27px;
+}
+
+h1 {
+
+    margin: 0;
+
+    text-align: center;
+
+    font-size: 20px;
+}
+
+.subtitle {
+
+    margin:
+        8px
+        0
+        30px;
+
+    text-align: center;
+
+    color: #718894;
+
+    font-size: 9px;
+
+    letter-spacing: 2px;
+}
+
+label {
+
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #8da3af;
+
+    font-size: 10px;
+
+    font-weight: bold;
+}
+
+input {
+
+    width: 100%;
+    height: 46px;
+
+    margin-bottom: 18px;
+
+    padding:
+        0 13px;
+
+    background: #07121a;
+
+    border:
+        1px solid #29404e;
+
+    border-radius: 7px;
+
+    outline: none;
+
+    color: white;
+}
+
+input:focus {
+
+    border-color:
+        #42d6cf;
+
+    box-shadow:
+        0 0 10px
+        rgba(66, 214, 207, .15);
+}
+
+button {
+
+    width: 100%;
+    height: 48px;
+
+    border: none;
+
+    border-radius: 7px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #126b69,
+            #198c87
+        );
+
+    color: white;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+button:hover {
+
+    filter:
+        brightness(1.15);
+}
+
+.error {
+
+    margin-bottom: 18px;
+
+    padding: 10px;
+
+    background: #32171b;
+
+    border-radius: 7px;
+
+    color: #ff737d;
+
+    text-align: center;
+
+    font-size: 11px;
+}
+
+.footer {
+
+    margin-top: 25px;
+
+    text-align: center;
+
+    color: #405865;
+
+    font-size: 8px;
+
+    letter-spacing: 1px;
+}
+
+
+/* =========================
+   MOBİL
+========================= */
+
+@media (max-width: 600px) {
+
+    .login-box {
+        width:
+            calc(100% - 30px);
+
+        padding:
+            30px 24px;
+    }
+
+    #plane {
+        transform:
+            translate(-50%, -50%);
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<!-- =========================
+     KIRMIZI IŞIKLAR
+========================= -->
+
+<div class="flight-lights">
+
+    <div class="flight-light light-1"></div>
+    <div class="flight-light light-2"></div>
+    <div class="flight-light light-3"></div>
+    <div class="flight-light light-4"></div>
+    <div class="flight-light light-5"></div>
+    <div class="flight-light light-6"></div>
+    <div class="flight-light light-7"></div>
+
+    <div class="route route-1"></div>
+    <div class="route route-2"></div>
+    <div class="route route-3"></div>
+
+</div>
+
+
+<!-- =========================
+     MOUSE UÇAĞI
+========================= -->
+
+<div id="plane">
+
+    <div class="plane-tail"></div>
+
+    <div class="plane-wing-left"></div>
+
+    <div class="plane-wing-right"></div>
+
+    <div class="plane-body"></div>
+
+    <div class="plane-trail"></div>
+
+</div>
+
+
+<!-- =========================
+     LOGIN
+========================= -->
+
+<div class="login-box">
+
+    <div class="logo">
+        ✈
+    </div>
+
+    <h1>
+        FLIGHT OPERATIONS CENTER
+    </h1>
+
+    <div class="subtitle">
+        ADMINISTRATOR ACCESS
+    </div>
+
+
+    {% if error %}
+
+    <div class="error">
+        {{ error }}
+    </div>
+
+    {% endif %}
+
+
+    <form method="POST">
+
+        <label>
+            USERNAME
+        </label>
+
+        <input
+            type="text"
+            name="username"
+            placeholder="Enter username"
+            required
+        >
+
+
+        <label>
+            PASSWORD
+        </label>
+
+        <input
+            type="password"
+            name="password"
+            placeholder="Enter password"
+            required
+        >
+
+
+        <button type="submit">
+            SIGN IN
+        </button>
+
+    </form>
+
+
+    <div class="footer">
+        FLIGHT OPS • SECURE ADMIN PORTAL
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================
+   MOUSE UÇAĞI
+========================= */
+
+const plane =
+    document.getElementById("plane");
+
+
+let currentX =
+    window.innerWidth / 2;
+
+let currentY =
+    window.innerHeight * 0.18;
+
+let targetX =
+    currentX;
+
+let targetY =
+    currentY;
+
+
+/* Mouse konumunu al */
+
+document.addEventListener(
+    "mousemove",
+    function(event) {
+
+        targetX =
+            event.clientX;
+
+        targetY =
+            event.clientY;
+
+    }
+);
+
+
+/* Uçağı yumuşak hareket ettir */
+
+function animatePlane() {
+
+    currentX +=
+        (targetX - currentX) * 0.08;
+
+    currentY +=
+        (targetY - currentY) * 0.08;
+
+
+    /* Uçağın yönünü hesapla */
+
+    const dx =
+        targetX - currentX;
+
+    const dy =
+        targetY - currentY;
+
+
+    const angle =
+        Math.atan2(
+            dy,
+            dx
+        ) * 180 / Math.PI + 90;
+
+
+    /* Konumu değiştir */
+
+    plane.style.left =
+        currentX + "px";
+
+    plane.style.top =
+        currentY + "px";
+
+
+    /* Mouse yönüne döndür */
+
+    plane.style.transform =
+        `translate(-50%, -50%)
+         rotate(${angle}deg)`;
+
+
+    requestAnimationFrame(
+        animatePlane
+    );
+
+}
+
+
+animatePlane();
+
+</script>
+
+
+</body>
+</html>
