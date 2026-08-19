@@ -1699,3 +1699,9 @@ h1 {
             drop-shadow(0 0 28px #ff0000);
     }
 }
+.logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 12px;
+}
